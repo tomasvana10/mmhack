@@ -606,7 +606,7 @@ function log(msg, type = null) {
         Chat.createTextBuilder()
             .append("[")
             .withColor(COLOUR_SCHEME.LOG_GENERIC)
-            .append("Murder Mystery")
+            .append("MMHack")
             .withColor(COLOUR_SCHEME.SCRIPT_NAME)
             .append("]")
             .withColor(COLOUR_SCHEME.LOG_GENERIC)
