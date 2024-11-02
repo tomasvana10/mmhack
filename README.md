@@ -45,48 +45,57 @@ The `JSMacros` script to make Hypixel's murder mystery minigame easier.
 > All this information can be displayed with `/mm help`
 
 ### Actions
-- **applybetterbaritonesettings**: Apply settings to baritone that will make it work better with `/mm autohide`.
-- **config**: Show the current instance settings of this script.
-- **debug**: Log dev-friendly information.
-- **glow.on/glow.off**: Enable or disable all glow and glow-like features.
-- **help**: Show the docs for `mmhack`.
-- **hide**: Hide in the nearest location. (req: `baritone`)
-- **hidestop**: Stop the process of hiding. (req: `baritone`)
-- **loadconfig**: Apply your config from the file system to your instance settings.
-- **logclear**: Clear all logged players in your instance - murderers and bowers.
-- **play**: Warp into a game of classic murder mystery.
-- **playdouble**: Warp into a game of double up murder mystery.
-- **saveconfig**: Save your current instance settings to your file system.
-- **targets.clear**: Clear all targeted players.
-- **targets.list**: List all targeted players.
-- **targets.listingame**: List all targeted players in your game.
-- **tick**: Enable or disable the script's main loop. Ensure you have this on to utilise the script properly.
+
+- `applyBetterBaritoneSettings`: Apply settings to baritone that will make it work better with /mm autohide.
+- `config`: Show the current instance settings of this script.
+- `debug`: Log dev-friendly information.
+- `glow on | glow off`: Enable or disable all glow and glow-like features.
+- `help`: Show this message.
+- `hide`: Hide in the nearest location. (req: baritone)
+- `hideStop`: Stop the process of hiding. (req: baritone)
+- `loadConfig`: Apply your config from the file system to your instance settings.
+- `logClear`: Clear all logged players in your instance - murderers and bowers.
+- `play`: Warp into a game of classic murder mystery.
+- `playDouble`: Warp into a game of double up murder mystery.
+- `refresh`: Refresh data, such as map information.
+- `saveConfig`: Save your current instance settings to your file system.
+- `setGhostBlocks`: Set all ghost blocks that the current map has registered.
+- `targets clear`: Clear all targeted players.
+- `targets list`: List all targeted players.
+- `targets listInGame`: List all targeted players in your game.
 
 ### Toggles
-- **autohide**: Automatically hide when the game starts. EXPERIMENTAL! (req: `baritone`)
-- **autoplay**: Automatically join a new instance of the same murder mystery game type (classic or double up) after death or game end.
-- **autotracer**: Add a varying amount of tracers depending on your role. (req: `JSM>=1.9.0`)
-- **glowbodies**: Glow dead bodies.
-- **glowswordpath**: Glow the travel path of the murderer's sword when it is thrown, so you can avoid it easier.
-- **glowbow**: Glow the detective's bow when it's dropped.
-- **glowgold**: Glow gold on the ground.
-- **glowhidingspots**: Glow hiding spot locations.
-- **glowinnos**: Glow innocent players.
-- **glownpcs**: Glow map-specific non-player characters (e.g. shovel shops).
-- **glowpois**: Glow map-specific points of interests (e.g. secret buttons).
-- **glowthrownsword**: Glow the murderer's sword when it is thrown.
-- **glowtraps**: Glow map-specific trap blocks (e.g. fall trap buttons).
-- **hud**: Display a hud showing all players that have been logged as either a murderer, bower or target in your instance.
-- **proximityalert**: Automatically receive titles notifying you if a murderer or bower is close, depending on your role.
-- **quicksword**: Allows you to left click with any slot then automatically select your sword, attack, and unsheath it.
-- **thrownswordalert**: Automatically receive titles notifying you if a murderer has thrown their sword (if you aren't a murderer).
+
+- `autoHide`: Automatically hide when the game starts. EXPERIMENTAL! (req: baritone)
+- `autoPlay`: Automatically join a new instance of the same murder mystery game type (classic or double up) after death or game end.
+- `autoTracer`: Add a varying amount of tracers to players depending on your role. (req: JSM>=1.9.0)
+- `glowBodies`: Glow dead bodies.
+- `glowBow`: Glow the detective's bow when it's dropped.
+- `glowGold`: Glow gold on the ground.
+- `glowHidingSpots`: Glow hiding spot locations.
+- `glowInnos`: Glow innocent players.
+- `glowNpcs`: Glow map-specific non-player characters (e.g. shovel shops).
+- `glowPois`: Glow map-specific points of interests (e.g. secret buttons).
+- `glowSwordPath`: Glow the travel path of the murderer's sword when it is thrown.
+- `glowThrownSword`: Glow the murderer's sword when it is thrown.
+- `glowTraps`: Glow map-specific trap blocks (e.g. fall trap buttons).
+- `hud`: Display a hud showing all players that have been logged as either a murderer, bower or target in your instance.
+- `proximityAlert`: Automatically receive titles notifying you if a murderer or bower is close, depending on your role.
+- `quickSword`: Allows you to left click with any slot then automatically select your sword, attack, and unsheath it.
+- `thrownSwordAlert`: Automatically receive titles notifying you if a murderer has thrown their sword (if you aren't a murderer).
+- `tick`: Enable or disable the script's main loop. Ensure you have this on to utilise the script properly.
 
 ### Configurations
-- **logbower**: Log a new bow player in your instance.
-- **logmurderer**: Log a new murderer in your game instance.
-- **logremove**: Remove a logged player from all logs in your instance.
-- **targets.add**: Add a player name to target.
-- **targets.remove**: Remove a player's name from your targeted players list.
-- **tick.rate**: Modify the speed at which the script detects changes and updates in your game, such as the murderer pulling out their sword (lower == better).
 
-
+- `logBower <name>`: Log a new bow player in your instance
+- `logMurderer <name>`: Log a new murderer in your game instance.
+- `logRemove <name>`: Remove a logged player from all logs in your instance.
+- `map <map> bois (add <coords> | remove <coords> | clear)`: Add, remove or clear block of interest data for the specified map.
+- `map <map> ghostBlockData (add <coords> <block> | remove <coords> | clear)`: Add, remove or clear ghost block data for the specified map.
+- `map <map> hidingPositions (add <footBlockCoords> | remove <footBlockCoords> | clear)`: Add, remove or clear hiding position data for the specified map.
+- `map <map> npcs (add | remove | clear)`: Add, remove or clear npc data for the specified map. Due to some limitations, you can only modify this data by looking at an entity and not through coordinate arguments.
+- `map <map> traps (add <coords> | remove <coords> | clear)`: Add, remove or clear trap block data for the specified map.
+- `map <map> uniqueBlock set <coords>`: Set the unique block for the specified map. This setting is best left untouched.
+- `targets add <name>`: Add a player name to target.
+- `targets remove <name>`: Remove a player's name from your targeted players list.
+- `tick rate <rate>`: Modify the speed at which the script detects changes and updates in your game, such as the murderer pulling out their sword (lower = quicker response times, possibly causing lag).
