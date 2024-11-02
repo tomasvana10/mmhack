@@ -24,44 +24,50 @@
         "minecraft:music_disc_blocks",
         "minecraft:iron_sword",
         "minecraft:ender_chest",
-        "minecraft:stone_sword",
-        "minecraft:iron_shovel",
-        "minecraft:stick",
-        "minecraft:wooden_axe",
-        "minecraft:wooden_sword",
-        "minecraft:dead_bush",
-        "minecraft:stone_shovel",
-        "minecraft:blaze_rod",
-        "minecraft:diamond_shovel",
-        "minecraft:quartz",
-        "minecraft:pumpkin_pie",
-        "minecraft:golden_pickaxe",
-        "minecraft:apple",
-        "minecraft:name_tag",
-        "minecraft:sponge",
-        "minecraft:carrot_on_a_stick",
-        "minecraft:bone",
-        "minecraft:carrot",
-        "minecraft:golden_carrot",
-        "minecraft:cookie",
-        "minecraft:diamond_axe",
-        "minecraft:rose_bush",
-        "minecraft:prismarine_shard",
-        "minecraft:cooked_beef",
-        "minecraft:nether_brick",
+        "minecraft:lapis_lazuli",
         "minecraft:cooked_chicken",
-        "minecraft:golden_hoe",
-        "minecraft:golden_sword",
-        "minecraft:diamond_sword",
-        "minecraft:diamond_hoe",
-        "minecraft:shears",
-        "minecraft:fish",
-        "minecraft:red_dye",
-        "minecraft:oak_boat",
-        "minecraft:glistering_melon_slice",
-        "minecraft:book",
+        "minecraft:bone",
+        "minecraft:blaze_rod",
+        "minecraft:nether_brick",
+        "minecraft:charcoal",
+        "minecraft:stone_sword",
+        "minecraft:dead_bush",
+        "minecraft:diamond_pickaxe",
         "minecraft:jungle_sapling",
-        "minecraft:salmon"
+        "minecraft:oak_boat",
+        "minecraft:golden_hoe",
+        "minecraft:sugar_cane",
+        "minecraft:bread",
+        "minecraft:music_disc_blocks",
+        "minecraft:glistering_melon_slice",
+        "minecraft:golden_pickaxe",
+        "minecraft:golden_shovel",
+        "minecraft:cooked_beef",
+        "minecraft:book",
+        "minecraft:prismarine_shard",
+        "minecraft:quartz",
+        "minecraft:diamond_sword",
+        "minecraft:name_tag",
+        "minecraft:diamond_shovel",
+        "minecraft:rose_bush",
+        "minecraft:pumpkin_pie",
+        "minecraft:carrot",
+        "minecraft:red_dye",
+        "minecraft:salmon",
+        "minecraft:shears",
+        "minecraft:iron_shovel",
+        "minecraft:golden_axe",
+        "minecraft:flint",
+        "minecraft:golden_carrot",
+        "minecraft:wooden_sword",
+        "minecraft:stick",
+        "minecraft:stone_shovel",
+        "minecraft:cookie",
+        "minecraft:diamond_hoe",
+        "minecraft:diamond_axe",
+        "minecraft:leather",
+        "minecraft:golden_sword",
+        "minecraft:wooden_axe"
     ],
     "COMMONITEMS": [
         "minecraft:filled_map",
@@ -74,6 +80,10 @@
     ],
     "MAP_DATA": {
         "Ancient Tomb": {
+            "ghostBlockData": [
+                [[22, 105, 35], "stone"],
+                [[23, 110, 38], "stone"]
+            ],
             "hidingPositions": [[54, 98, 40]],
             "uniqueBlock": ["minecraft:nether_brick_fence", [42, 102, -4]],
             "pois": {
@@ -90,28 +100,29 @@
             "traps": []
         },
         "Villa": {
-            "ghostBlockData": [
-                [[-1, 88, -53], "air"],
-                [[-2, 88, -53], "air"],
-                [[-2, 87, -53], "stone"]
-            ],
+            "ghostBlockData": [],
             "hidingPositions": [
-                [22, 87, -46],
-                [27, 86, -12],
-                [25, 85, 20],
-                [-17, 92, 21],
-                [-2, 88, -53]
+                [-34, 69, -28],
+                [18, 70, -40],
+                [21, 70, -14],
+                [38, 70, 19],
+                [20, 72, 0],
+                [-23, 81, 21]
             ],
-            "uniqueBlock": ["minecraft:chiseled_quartz_block", [21, 86, -14]],
+            "uniqueBlock": ["minecraft:nether_brick_stairs", [-2, 73, 36]],
             "pois": {
                 "bois": [],
                 "npcs": [
-                    [0.5, 88, 0.5],
-                    [0.5, 88, -50.5],
-                    [-22.5, 83, 41.5]
+                    [0.5, 72, 52.5],
+                    [0.5, 71, -59.5]
                 ]
             },
-            "traps": [[17, 87, -38]]
+            "traps": [
+                [3, 71, 18],
+                [-3, 71, 18],
+                [24, 71, -44],
+                [24, 71, -50]
+            ]
         },
         "Transport": {
             "ghostBlockData": [
@@ -166,6 +177,7 @@
             "traps": []
         },
         "Cattleridge Farm": {
+            "ghostBlockData": [],
             "hidingPositions": [
                 [-2, 71, 43],
                 [3, 71, 55],
@@ -192,6 +204,7 @@
             ]
         },
         "San Peratico V2": {
+            "ghostBlockData": [],
             "hidingPositions": [
                 [11, 76, 33],
                 [-48, 65, -1]
@@ -200,8 +213,8 @@
             "pois": {
                 "bois": [],
                 "npcs": [
-                    [25.5, 69.0, 30.5],
-                    [-33.5, 69.0, -18.5]
+                    [25.5, 69, 30.5],
+                    [-33.5, 69, -18.5]
                 ]
             },
             "traps": [
@@ -214,6 +227,7 @@
             ]
         },
         "Spooky Mansion": {
+            "ghostBlockData": [],
             "hidingPositions": [
                 [83, 77, -27],
                 [92, 77, 7],
@@ -251,6 +265,7 @@
             ]
         },
         "Skyway Pier": {
+            "ghostBlockData": [],
             "hidingPositions": [
                 [3, 70, -2],
                 [73, 70, 22],
@@ -259,7 +274,7 @@
             "uniqueBlock": ["minecraft:lime_wool", [54, 84, -4]],
             "pois": {
                 "bois": [],
-                "npcs": []
+                "npcs": [[29.5, 70, 23.5]]
             },
             "traps": [
                 [38, 71, 5],
@@ -295,6 +310,7 @@
             "traps": []
         },
         "Hollywood": {
+            "ghostBlockData": [],
             "hidingPositions": [
                 [-33, 66, 19],
                 [-22, 66, 17],
@@ -321,31 +337,36 @@
             "traps": []
         },
         "Archives Top Floor": {
+            "ghostBlockData": [],
             "hidingPositions": [
-                [1, 94, 48],
-                [-16, 94, 48],
-                [-66, 94, -39],
-                [-52, 94, -43],
-                [-27, 94, -27],
-                [-4, 93, -48],
-                [-47, 94, -5]
+                [1, 71, 42],
+                [43, 72, 45],
+                [2, 72, -39],
+                [21, 72, 41],
+                [-14, 72, -14]
             ],
-            "uniqueBlock": ["minecraft:gray_stained_glass", [-17, 93, 12]],
+            "uniqueBlock": ["minecraft:chiseled_quartz_block", [-27, 81, 10]],
             "pois": {
                 "bois": [
-                    [-17, 95, 12],
-                    [-17, 95, -12],
-                    [-69, 95, 0],
-                    [2, 93, 32],
-                    [-50, 93, -18],
-                    [-36, 93, 30],
-                    [2, 93, 32]
+                    [-27, 71, -19],
+                    [28, 71, 29],
+                    [31, 71, 29]
                 ],
-                "npcs": [[-60.5, 105.0, 12.5]]
+                "npcs": [[39.5, 71, 40.5]]
             },
-            "traps": []
+            "traps": [
+                [16, 72, 29],
+                [16, 72, 23],
+                [20, 72, 23],
+                [20, 72, 29],
+                [2, 72, -16],
+                [-2, 72, -16],
+                [-2, 72, -14],
+                [2, 72, -14]
+            ]
         },
         "Snowfall": {
+            "ghostBlockData": [],
             "hidingPositions": [
                 [-22, 76, -59],
                 [20, 85, -39]
@@ -364,6 +385,7 @@
             "traps": [[18, 76, -62]]
         },
         "Aquarium": {
+            "ghostBlockData": [],
             "hidingPositions": [
                 [9, 66, -11],
                 [-10, 66, -11],
@@ -399,6 +421,7 @@
             ]
         },
         "Hypixel World": {
+            "ghostBlockData": [],
             "hidingPositions": [
                 [52, 65, -16],
                 [38, 65, -5]
@@ -420,6 +443,7 @@
             "traps": []
         },
         "Cruise Ship": {
+            "ghostBlockData": [],
             "hidingPositions": [
                 [8, 77, -57],
                 [-3, 89, -29]
@@ -435,9 +459,11 @@
             "traps": []
         },
         "Subway": {
+            "ghostBlockData": [],
             "hidingPositions": [
                 [-34, 86, 16],
-                [19, 88, -13]
+                [19, 88, -13],
+                [55, 101, -3]
             ],
             "uniqueBlock": ["minecraft:crafting_table", [-9, 97, -26]],
             "pois": {
@@ -475,6 +501,7 @@
             ]
         },
         "Widow's Den": {
+            "ghostBlockData": [],
             "hidingPositions": [
                 [19, 78, 51],
                 [-5, 73, 47],
@@ -504,6 +531,7 @@
             ]
         },
         "Towerfall": {
+            "ghostBlockData": [[[-24, 162, -3], "stone"]],
             "hidingPositions": [
                 [-8, 167, 10],
                 [-8, 167, -10],
@@ -524,6 +552,10 @@
             ]
         },
         "Headquarters": {
+            "ghostBlockData": [
+                [[-33, 77, -11], "stone"],
+                [[-31, 77, -11], "stone"]
+            ],
             "hidingPositions": [
                 [15, 66, 10],
                 [28, 76, -8],
@@ -541,6 +573,7 @@
             "traps": []
         },
         "Mountain": {
+            "ghostBlockData": [],
             "hidingPositions": [
                 [7, 70, 130],
                 [-13, 93, -1],
@@ -558,6 +591,7 @@
             "traps": []
         },
         "Library": {
+            "ghostBlockData": [],
             "hidingPositions": [
                 [-19, 65, 34],
                 [-1, 66, -22],
@@ -578,6 +612,7 @@
             "traps": []
         },
         "Darkfall": {
+            "ghostBlockData": [],
             "hidingPositions": [
                 [-2, 28, -28],
                 [-62, 30, -3],
@@ -609,23 +644,23 @@
     },
     "DOC_DATA": [
         {
-            "command": "applybetterbaritonesettings",
+            "command": "applyBetterBaritoneSettings",
             "doc": "Apply settings to baritone that will make it work better with /mm autohide.",
             "type": "action"
         },
         {
-            "command": "autohide",
+            "command": "autoHide",
             "doc": "Automatically hide when the game starts. EXPERIMENTAL! (req: baritone)",
             "type": "toggle"
         },
         {
-            "command": "autoplay",
+            "command": "autoPlay",
             "doc": "Automatically join a new instance of the same murder mystery game type (classic or double up) after death or game end.",
             "type": "toggle"
         },
         {
-            "command": "autotracer",
-            "doc": "Add a varying amount of tracers depending on your role. (req: JSM>=1.9.0)",
+            "command": "autoTracer",
+            "doc": "Add a varying amount of tracers to players depending on your role. (req: JSM>=1.9.0)",
             "type": "toggle"
         },
         {
@@ -639,57 +674,57 @@
             "type": "action"
         },
         {
-            "command": "glow.on/glow.off",
+            "command": "glow on | glow off",
             "doc": "Enable or disable all glow and glow-like features.",
             "type": "action"
         },
         {
-            "command": "glowbodies",
+            "command": "glowBodies",
             "doc": "Glow dead bodies.",
             "type": "toggle"
         },
         {
-            "command": "glowswordpath",
-            "doc": "Glow the travel path of the murderer's sword when it is thrown, so you can avoid it easier.",
-            "type": "toggle"
-        },
-        {
-            "command": "glowbow",
+            "command": "glowBow",
             "doc": "Glow the detective's bow when it's dropped.",
             "type": "toggle"
         },
         {
-            "command": "glowgold",
+            "command": "glowGold",
             "doc": "Glow gold on the ground.",
             "type": "toggle"
         },
         {
-            "command": "glowhidingspots",
+            "command": "glowHidingSpots",
             "doc": "Glow hiding spot locations.",
             "type": "toggle"
         },
         {
-            "command": "glowinnos",
+            "command": "glowInnos",
             "doc": "Glow innocent players.",
             "type": "toggle"
         },
         {
-            "command": "glownpcs",
+            "command": "glowNpcs",
             "doc": "Glow map-specific non-player characters (e.g. shovel shops).",
             "type": "toggle"
         },
         {
-            "command": "glowpois",
+            "command": "glowPois",
             "doc": "Glow map-specific points of interests (e.g. secret buttons).",
             "type": "toggle"
         },
         {
-            "command": "glowthrownsword",
+            "command": "glowSwordPath",
+            "doc": "Glow the travel path of the murderer's sword when it is thrown.",
+            "type": "toggle"
+        },
+        {
+            "command": "glowThrownSword",
             "doc": "Glow the murderer's sword when it is thrown.",
             "type": "toggle"
         },
         {
-            "command": "glowtraps",
+            "command": "glowTraps",
             "doc": "Glow map-specific trap blocks (e.g. fall trap buttons).",
             "type": "toggle"
         },
@@ -704,7 +739,7 @@
             "type": "action"
         },
         {
-            "command": "hidestop",
+            "command": "hideStop",
             "doc": "Stop the process of hiding. (req: baritone)",
             "type": "action"
         },
@@ -714,28 +749,58 @@
             "type": "toggle"
         },
         {
-            "command": "loadconfig",
+            "command": "loadConfig",
             "doc": "Apply your config from the file system to your instance settings.",
             "type": "action"
         },
         {
-            "command": "logbower",
+            "command": "logBower <name>",
             "doc": "Log a new bow player in your instance",
             "type": "config"
         },
         {
-            "command": "logclear",
+            "command": "logClear",
             "doc": "Clear all logged players in your instance - murderers and bowers.",
             "type": "action"
         },
         {
-            "command": "logmurderer",
+            "command": "logMurderer <name>",
             "doc": "Log a new murderer in your game instance.",
             "type": "config"
         },
         {
-            "command": "logremove",
+            "command": "logRemove <name>",
             "doc": "Remove a logged player from all logs in your instance.",
+            "type": "config"
+        },
+        {
+            "command": "map <map> bois (add <coords> | remove <coords> | clear)",
+            "doc": "Add, remove or clear block of interest data for the specified map.",
+            "type": "config"
+        },
+        {
+            "command": "map <map> ghostBlockData (add <coords> <block> | remove <coords> | clear)",
+            "doc": "Add, remove or clear ghost block data for the specified map.",
+            "type": "config"
+        },
+        {
+            "command": "map <map> hidingPositions (add <footBlockCoords> | remove <footBlockCoords> | clear)",
+            "doc": "Add, remove or clear hiding position data for the specified map.",
+            "type": "config"
+        },
+        {
+            "command": "map <map> npcs (add | remove | clear)",
+            "doc": "Add, remove or clear npc data for the specified map. Due to some limitations, you can only modify this data by looking at an entity and not through coordinate arguments.",
+            "type": "config"
+        },
+        {
+            "command": "map <map> traps (add <coords> | remove <coords> | clear)",
+            "doc": "Add, remove or clear trap block data for the specified map.",
+            "type": "config"
+        },
+        {
+            "command": "map <map> uniqueBlock set <coords>",
+            "doc": "Set the unique block for the specified map. This setting is best left untouched.",
             "type": "config"
         },
         {
@@ -744,52 +809,62 @@
             "type": "action"
         },
         {
-            "command": "playdouble",
+            "command": "playDouble",
             "doc": "Warp into a game of double up murder mystery.",
             "type": "action"
         },
         {
-            "command": "proximityalert",
+            "command": "proximityAlert",
             "doc": "Automatically receive titles notifying you if a murderer or bower is close, depending on your role.",
             "type": "toggle"
         },
         {
-            "command": "quicksword",
+            "command": "quickSword",
             "doc": "Allows you to left click with any slot then automatically select your sword, attack, and unsheath it.",
             "type": "toggle"
         },
         {
-            "command": "saveconfig",
+            "command": "refresh",
+            "doc": "Refresh data, such as map information.",
+            "type": "action"
+        },
+        {
+            "command": "saveConfig",
             "doc": "Save your current instance settings to your file system.",
             "type": "action"
         },
         {
-            "command": "targets.add",
+            "command": "setGhostBlocks",
+            "doc": "Set all ghost blocks that the current map has registered.",
+            "type": "action"
+        },
+        {
+            "command": "targets add <name>",
             "doc": "Add a player name to target.",
             "type": "config"
         },
         {
-            "command": "targets.clear",
+            "command": "targets clear",
             "doc": "Clear all targeted players.",
             "type": "action"
         },
         {
-            "command": "targets.list",
+            "command": "targets list",
             "doc": "List all targeted players.",
             "type": "action"
         },
         {
-            "command": "targets.listingame",
+            "command": "targets listInGame",
             "doc": "List all targeted players in your game.",
             "type": "action"
         },
         {
-            "command": "targets.remove",
+            "command": "targets remove <name>",
             "doc": "Remove a player's name from your targeted players list.",
             "type": "config"
         },
         {
-            "command": "thrownswordalert",
+            "command": "thrownSwordAlert",
             "doc": "Automatically receive titles notifying you if a murderer has thrown their sword (if you aren't a murderer).",
             "type": "toggle"
         },
@@ -799,8 +874,8 @@
             "type": "toggle"
         },
         {
-            "command": "tick.rate",
-            "doc": "Modify the speed at which the script detects changes and updates in your game, such as the murderer pulling out their sword (lower = better).",
+            "command": "tick rate <rate>",
+            "doc": "Modify the speed at which the script detects changes and updates in your game, such as the murderer pulling out their sword (lower = quicker response times, possibly causing lag).",
             "type": "config"
         }
     ],
@@ -886,7 +961,7 @@
         "GENERIC": "0x8",
         "LOG_RED": "0xc",
         "LOG_GREEN": "0xa",
-        "LOG_AQUA": "0xb",  
+        "LOG_AQUA": "0xb",
         "LOG_GOLD": "0x6",
         "LOG_GENERIC": "0x7",
         "NPC": "0x42f569",
