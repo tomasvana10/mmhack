@@ -2,7 +2,7 @@
 
 ![2024-09-03_20 09 44](https://github.com/user-attachments/assets/87743d1e-8ace-45a7-96a7-2d89530ebedc)
 
-The `JSMacros` script to make Hypixel's murder mystery minigame easier.
+The `JSMacros` script to make Hypixel's `Murder Mystery` minigame easier.
 
 ## Supported Minecraft versions
 - `1.17.1`
@@ -13,46 +13,50 @@ The `JSMacros` script to make Hypixel's murder mystery minigame easier.
 ## Requirements
 - `Fabric`
 - `JSMacros`
-- `Baritone API` (optional - required for automatic hiding system)
-
+- `Baritone API` (optional)
+  
 ## Installation
 1. Download the [Fabric API Installer](https://fabricmc.net/use/installer/) and follow the steps to install `Fabric` for your chosen version.
-2. Download the [JSMacros JAR](https://www.curseforge.com/minecraft/mc-mods/jsmacros).
+   
+3. Download the [JSMacros JAR](https://www.curseforge.com/minecraft/mc-mods/jsmacros).
 > [!WARNING]
 > Certain features of the script will not work if you download a version of `JSMacros` less than `1.9.0`.
 
-3. Download the [Baritone API JAR](https://github.com/cabaletta/baritone/releases) (if you wish to use the automatic hiding feature).
+3. Download the [Baritone API](https://github.com/cabaletta/baritone/releases) if you wish to use `mmhack`'s automatic hiding feature.
 
 4. Place the JARs in your mods folder. This can usually be found in `%APPDATA%/.minecraft/mods` if you are playing Minecraft through the standard launcher.
-   
-5. Launch Minecraft.
-   
-6. Set a keybind to open the `JSMacros` GUI. By default, this is set to `k`.
 
-7. In-game, press the keybind to open the GUI and follow these steps:
-   1. Open the `JSMacros` GUI.
-   2. Click `Services`.
-   3. Click on the `+` button at the top right of the script table.
-   4. Give the service a name.
-   5. Click on the `./` to change the directory to the script. This can be done by pressing `Open Folder` and selecting to the `mmhack` folder you downloaded from this repository.
-   6. Select `index.js` as the service script.
-   7. Enable and run the script by clicking on the two red buttons on the right of the service (`Disabled` and `Stopped`).
+5. Download [the latest release](https://github.com/tomasvana10/mmhack/releases/latest) of `mmhack`, then extract it and move the script folder (also called `mmhack`) to wherever you wish.
 
-8. Enjoy the script.
+6. **Optional**: Rename `sample.config.json` to `config.json` if you want to use the script's premade configuration.  
+   
+7. Launch Minecraft.
+   
+8. Set a keybind in `Controls` to open the `JSMacros` GUI. By default, this is set to `k`.
+
+9. In-game, press the keybind to open the GUI and follow these steps:
+   1. Click on the `Services` tab.
+   2. Click on the `+` button at the top right of the script table.
+   3. Give the service a name.
+   4. Click on the `./` to change the directory to the script. This can be done by pressing `Open Folder` and selecting to the `mmhack` folder you downloaded from this repository.
+   5. Select `index.js` as the service script.
+   6. Enable and run the script by clicking on the two red buttons on the right of the service (`Disabled` -> `Enabled` and `Stopped` -> `Running`).
+
+10. Enjoy the script.
 
 ## Command reference
 > [!NOTE]
-> All this information can be displayed with `/mm help`
+> The following command information can be viewed in-game with `/mm help`
 
 ### Actions
 
-- `applyBetterBaritoneSettings`: Apply settings to baritone that will make it work better with /mm autohide.
+- `applyBetterBaritoneSettings`: Apply settings to baritone that will make it work better with `/mm autohide`.
 - `config`: Show the current instance settings of this script.
 - `debug`: Log dev-friendly information.
 - `glow on | glow off`: Enable or disable all glow and glow-like features.
 - `help`: Show this message.
-- `hide`: Hide in the nearest location. (req: baritone)
-- `hideStop`: Stop the process of hiding. (req: baritone)
+- `hide`: Hide in the nearest location. (*req: baritone*)
+- `hideStop`: Stop the process of hiding. (*req: baritone*)
 - `loadConfig`: Apply your config from the file system to your instance settings.
 - `logClear`: Clear all logged players in your instance - murderers and bowers.
 - `play`: Warp into a game of classic murder mystery.
@@ -66,9 +70,9 @@ The `JSMacros` script to make Hypixel's murder mystery minigame easier.
 
 ### Toggles
 
-- `autoHide`: Automatically hide when the game starts. EXPERIMENTAL! (req: baritone)
+- `autoHide`: Automatically hide when the game starts. EXPERIMENTAL! (*req: baritone*)
 - `autoPlay`: Automatically join a new instance of the same murder mystery game type (classic or double up) after death or game end.
-- `autoTracer`: Add a varying amount of tracers to players depending on your role. (req: JSM>=1.9.0)
+- `autoTracer`: Add a varying amount of tracers to players depending on your role. (*req: JSM>=1.9.0*)
 - `glowBodies`: Glow dead bodies.
 - `glowBow`: Glow the detective's bow when it's dropped.
 - `glowGold`: Glow gold on the ground.
