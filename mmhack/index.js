@@ -2,6 +2,8 @@
  * Murder Mystery hack script
  */
 
+const { setGhost } = require("./ghostblock.js");
+
 // Global vars
 const yourName = Player.getPlayer().getName().getString();
 const cachedUUIDToTargetMap = {};
@@ -12,8 +14,8 @@ let murderMysteryMap = "";
 let murderers = new Set();
 let bowers = new Set();
 let targets = new Set();
-let proximityAlertOnCooldown = false;
-let thrownSwordAlertOnCooldown = false;
+let proximityAlertOnCooldown = false; // reassigned via eval()
+let thrownSwordAlertOnCooldown = false; // reassigned via eval()
 let swordPathD3D = null;
 let hudD2D = null;
 let currentThrownSword = null;
@@ -30,12 +32,20 @@ const CMD_TYPES = Object.freeze({
     TOGGLEABLE: "toggle",
     CONFIGURABLE: "config",
 });
+const DATA_MOD_MODES = Object.freeze({
+    ADD: "add",
+    REMOVE: "remove",
+    SET: "set",
+    CLEAR: "clear",
+});
+const PLACEHOLDERS = Object.freeze({
+    CURRENT: "%CURRENT%",
+});
 
 // Regex
 const prayedDetective = /.*that ([\d\w_]+) is the Detective!/;
 const prayedMurderer = /.*that ([\d\w_]+) is the Murderer!/;
 
-const toggled = GlobalVars.getBoolean("mm.toggled");
 const mainCommands = {
     hud: {
         toggle: simpleToggle,
@@ -48,13 +58,13 @@ const mainCommands = {
         boolean: "mm.hud",
         type: CMD_TYPES.TOGGLEABLE,
     },
-    glowinnos: {
+    glowInnos: {
         toggle: simpleToggle,
         msg: "Innocent glow",
         boolean: "mm.glowInnocents",
         type: CMD_TYPES.TOGGLEABLE,
     },
-    glowbow: {
+    glowBow: {
         toggle: simpleToggle,
         msg: "Bow glow",
         boolean: "mm.glowBow",
@@ -67,96 +77,110 @@ const mainCommands = {
         boolean: null,
         type: CMD_TYPES.ACTION,
     },
+    setGhostBlocks: {
+        toggle: null,
+        action: () => {
+            setGhostBlocks(true);
+        },
+        msg: null,
+        boolean: null,
+        type: CMD_TYPES.ACTION,
+    },
+    refresh: {
+        toggle: null,
+        action: () => initData(true),
+        msg: null,
+        boolean: null,
+        type: CMD_TYPES.ACTION,
+    },
     debug: {
         toggle: simpleToggle,
         msg: "Debug mode",
         boolean: "mm.debug",
         type: CMD_TYPES.TOGGLEABLE,
     },
-    glowgold: {
+    glowGold: {
         toggle: simpleToggle,
         msg: "Gold glow",
         boolean: "mm.glowGold",
         type: CMD_TYPES.TOGGLEABLE,
     },
-    glowbodies: {
+    glowBodies: {
         toggle: simpleToggle,
         msg: "Body glow",
         boolean: "mm.glowBodies",
         type: CMD_TYPES.TOGGLEABLE,
     },
-    glowswordpath: {
+    glowSwordPath: {
         toggle: simpleToggle,
         msg: "Sword path glow",
         boolean: "mm.glowSwordPath",
         type: CMD_TYPES.TOGGLEABLE,
     },
-    autotracer: {
+    autoTracer: {
         toggle: simpleToggle,
         msg: "Autotracer",
         boolean: "mm.autoTracer",
         type: CMD_TYPES.TOGGLEABLE,
     },
-    autoplay: {
+    autoPlay: {
         toggle: simpleToggle,
         msg: "Autoplay",
         boolean: "mm.autoPlay",
         type: CMD_TYPES.TOGGLEABLE,
     },
-    glowpois: {
+    glowPois: {
         toggle: simpleToggle,
         msg: "Points of interest glow",
         boolean: "mm.glowPOIs",
         type: CMD_TYPES.TOGGLEABLE,
     },
-    glownpcs: {
+    glowNpcs: {
         toggle: simpleToggle,
         msg: "NPC glow",
         boolean: "mm.glowNPCs",
         type: CMD_TYPES.TOGGLEABLE,
     },
-    glowthrownsword: {
+    glowThrownSword: {
         toggle: simpleToggle,
         msg: "Thrown sword glow",
         boolean: "mm.glowThrownSword",
         type: CMD_TYPES.TOGGLEABLE,
     },
-    glowtraps: {
+    glowTraps: {
         toggle: simpleToggle,
         msg: "Trap glow",
         boolean: "mm.glowTraps",
         type: CMD_TYPES.TOGGLEABLE,
     },
-    glowhidingspots: {
+    glowHidingSpots: {
         toggle: simpleToggle,
         msg: "Hiding spot glow",
         boolean: "mm.glowHidingSpots",
         type: CMD_TYPES.TOGGLEABLE,
     },
-    thrownswordalert: {
+    thrownSwordAlert: {
         toggle: simpleToggle,
         msg: "Thrown sword alert",
         boolean: "mm.thrownSwordAlert",
         type: CMD_TYPES.TOGGLEABLE,
     },
-    proximityalert: {
+    proximityAlert: {
         toggle: simpleToggle,
         msg: "Proximity alert",
         boolean: "mm.proximityAlert",
         type: CMD_TYPES.TOGGLEABLE,
     },
-    quicksword: {
+    quickSword: {
         toggle: simpleToggle,
         msg: "Quicksword",
         boolean: "mm.autoSword",
         type: CMD_TYPES.TOGGLEABLE,
     },
-    autohide: {
+    autoHide: {
         toggle: simpleToggle,
         action: () => {
-            if (baritoneUnavailable()) {
-                return;
-            }
+            if (baritoneUnavailable()) return;
             if (!GlobalVars.getBoolean("mm.autoHide")) {
                 baritoneCommandMan.execute("cancel");
                 currentBaritoneGoalBlock = null;
@@ -173,7 +197,7 @@ const mainCommands = {
         action: () => {
             if (!isInMurderMysteryGame) {
                 return log(
-                    "You must be in a Murder Mystery game to perform this action. If you are, ensure the tick is on with /mm tick.",
+                    "You are either not in a game of Murder Mystery, or /mm tick is not on, so this action cannot be performed.",
                     "red"
                 );
             }
@@ -183,12 +207,10 @@ const mainCommands = {
         boolean: null,
         type: CMD_TYPES.ACTION,
     },
-    hidestop: {
+    hideStop: {
         toggle: null,
         action: () => {
-            if (baritoneUnavailable()) {
-                return;
-            }
+            if (baritoneUnavailable()) return;
             baritoneCommandMan.execute("cancel");
             currentBaritoneGoalBlock = null;
         },
@@ -203,26 +225,24 @@ const mainCommands = {
         boolean: null,
         type: CMD_TYPES.ACTION,
     },
-    saveconfig: {
+    saveConfig: {
         toggle: null,
         action: () => saveConfig(),
         msg: null,
         boolean: null,
         type: CMD_TYPES.ACTION,
     },
-    loadconfig: {
+    loadConfig: {
         toggle: null,
         action: () => loadConfig(),
         msg: null,
         boolean: null,
         type: CMD_TYPES.ACTION,
     },
-    applybetterbaritonesettings: {
+    applyBetterBaritoneSettings: {
         toggle: null,
         action: () => {
-            if (baritoneUnavailable()) {
-                return;
-            }
+            if (baritoneUnavailable()) return;
             Object.keys(BETTER_BARITONE_SETTINGS).forEach(
                 (k) => (baritoneSettings[k].value = eval(BETTER_BARITONE_SETTINGS[k]))
             );
@@ -239,14 +259,14 @@ const mainCommands = {
         boolean: null,
         type: CMD_TYPES.ACTION,
     },
-    playdouble: {
+    playDouble: {
         toggle: null,
         action: () => Chat.say("/play murder_double_up"),
         msg: null,
         boolean: null,
         type: CMD_TYPES.ACTION,
     },
-    logclear: {
+    logClear: {
         toggle: null,
         action: () => {
             murderers = new Set();
@@ -277,32 +297,47 @@ const settings = Object.keys(mainCommands)
 let tickListener;
 let startListener;
 let clickListener;
-let joinListener = JsMacros.on(
+const joinListener = JsMacros.on(
     "DimensionChange",
     JavaWrapper.methodToJavaAsync(() => checkAddress())
 );
 
 // Data for various features
 let JSON_DATA;
-try {
-    JSON_DATA = JSON.parse(FS.open("data.json").read());
-} catch (err) {
-    throw new Error("You must have a data.json file present in the same directory as this script.");
+let BETTER_BARITONE_SETTINGS, HYPIXEL_RANKS, KNIVES, COMMONITEMS, MAP_DATA, DOC_DATA, COLOUR_SCHEME, GLOW_COLOUR_REPR;
+function initData(refreshing = false) {
+    JSON_DATA = read("data.json");
+    BETTER_BARITONE_SETTINGS = JSON_DATA.BETTER_BARITONE_SETTINGS;
+    HYPIXEL_RANKS = JSON_DATA.HYPIXEL_RANKS;
+    KNIVES = JSON_DATA.KNIVES;
+    COMMONITEMS = JSON_DATA.COMMONITEMS;
+    MAP_DATA = JSON_DATA.MAP_DATA;
+    DOC_DATA = JSON_DATA.DOC_DATA;
+    COLOUR_SCHEME = Object.fromEntries(
+        Object.entries(JSON_DATA.COLOUR_SCHEME).map(([key, value]) => [key, parseInt(value, 16)])
+    );
+    GLOW_COLOUR_REPR = JSON_DATA.GLOW_COLOUR_REPR.map((obj) => ({
+        "what": obj.what,
+        "colour": parseInt(obj.colour, 16),
+    }));
+    DOC_DATA.sort((a, b) => a.command.localeCompare(b.command));
+    if (refreshing) {
+        log("Refreshed data.", "green");
+    }
 }
-const BETTER_BARITONE_SETTINGS = JSON_DATA.BETTER_BARITONE_SETTINGS;
-const HYPIXEL_RANKS = JSON_DATA.HYPIXEL_RANKS;
-const KNIVES = JSON_DATA.KNIVES;
-const COMMONITEMS = JSON_DATA.COMMONITEMS;
-const MAP_DATA = JSON_DATA.MAP_DATA;
-const DOC_DATA = JSON_DATA.DOC_DATA;
-const COLOUR_SCHEME = Object.fromEntries(
-    Object.entries(JSON_DATA.COLOUR_SCHEME).map(([key, value]) => [key, parseInt(value, 16)])
-);
-const GLOW_COLOUR_REPR = JSON_DATA.GLOW_COLOUR_REPR.map((obj) => ({
-    "what": obj.what,
-    "colour": parseInt(obj.colour, 16),
-}));
-DOC_DATA.sort((a, b) => a.command.localeCompare(b.command));
+initData();
+
+function read(src) {
+    try {
+        return JSON.parse(FS.open(src).read());
+    } catch {
+        throw new Error(`You must have a ${src} file present in the same directory as this script.`);
+    }
+}
+
+function write(dest, data) {
+    FS.open(dest).write(JSON.stringify(data, null, 2));
+}
 
 function baritoneUnavailable() {
     if (!isBaritoneAvailable) {
@@ -394,7 +429,7 @@ function setSwordPathBoxes(sword) {
 function getUUIDFromName(name) {
     try {
         return JSON.parse(Request.get(nameAPI + name).text()).id;
-    } catch (err) {
+    } catch {
         log("This name is either invalid or does not exist.", "red");
         return null;
     }
@@ -403,7 +438,7 @@ function getUUIDFromName(name) {
 function getNameFromUUID(uuid) {
     try {
         return JSON.parse(Request.get(uuidAPI + uuid).text()).name;
-    } catch (err) {
+    } catch {
         log("Failed to fetch UUID.", "red");
         return null;
     }
@@ -438,7 +473,7 @@ function cooldownVariable(variableRef, ms) {
 
 function autoBuildSimpleCommands(builder) {
     Object.keys(mainCommands).forEach((cmdName) => {
-        let entries = mainCommands[cmdName];
+        const entries = mainCommands[cmdName];
         let cmd;
         if (entries.toggle) {
             cmd = () => {
@@ -477,8 +512,8 @@ function getConfigJSON() {
 
 function loadConfig() {
     try {
-        Object.entries(JSON.parse(FS.open("config.json").read())).forEach((entry) => {
-            let func =
+        Object.entries(read("config.json")).forEach((entry) => {
+            const func =
                 entry[0] === "mm.tickRate"
                     ? GlobalVars.putInt
                     : entry[0] === "mm.targets"
@@ -494,14 +529,14 @@ function loadConfig() {
         });
         log("Applied your config!", "green");
         return true;
-    } catch (err) {
+    } catch {
         log("You must first create a config file by running /mm saveconfig", "red");
         return null;
     }
 }
 
 function saveConfig() {
-    FS.open("config.json").write(JSON.stringify(getConfigJSON()));
+    write("config.json", getConfigJSON());
     log("Saved your config to the file system!", "green");
 }
 
@@ -605,11 +640,11 @@ function log(msg, type = null) {
     return Chat.log(
         Chat.createTextBuilder()
             .append("[")
-            .withColor(COLOUR_SCHEME.LOG_GENERIC)
-            .append("MMHack")
+            .withColor(0xf)
+            .append("MM")
             .withColor(COLOUR_SCHEME.SCRIPT_NAME)
             .append("]")
-            .withColor(COLOUR_SCHEME.LOG_GENERIC)
+            .withColor(0xf)
             .append(` ${msg}`)
             .withColor(msgColour)
             .build()
@@ -639,14 +674,14 @@ function getMapFromUniqueBlock() {
 }
 
 function getMap() {
-    let index = !GlobalVars.getBoolean("mm.youAreMurderer")
+    const index = !GlobalVars.getBoolean("mm.youAreMurderer")
         ? murderMysteryGameType === "single"
             ? 4
             : 2
         : murderMysteryGameType === "single"
         ? 2
         : 0;
-    let map = Chat.sectionSymbolToAmpersand(
+    const map = Chat.sectionSymbolToAmpersand(
         World.getScoreboards()?.getCurrentScoreboard()?.getKnownPlayersDisplayNames()[index]?.getString().slice(5) ??
             "fallback"
     ).replace("&i", "");
@@ -658,7 +693,7 @@ function checkAddress() {
 }
 
 function distanceFrom(target) {
-    let you = Player.getPlayer();
+    const you = Player.getPlayer();
     return Math.round(
         Math.sqrt(
             Math.pow(target.getX() - you.getX(), 2) +
@@ -670,14 +705,10 @@ function distanceFrom(target) {
 }
 
 function hide() {
-    if (baritoneUnavailable()) {
-        return;
-    }
-    let positions = MAP_DATA[murderMysteryMap].hidingPositions;
-    if (positions.length === 0) {
-        return;
-    }
-    let hidingPos = positions
+    if (baritoneUnavailable()) return;
+    const positions = MAP_DATA[murderMysteryMap].hidingPositions;
+    if (positions.length === 0) return;
+    const hidingPos = positions
         .map((coords) => [coords, distanceFrom(World.getBlock(coords[0], coords[1], coords[2]))])
         .sort((a, b) => a[1] - b[1])[0][0];
     currentBaritoneGoalBlock = new baritoneGoalBlock(hidingPos[0], hidingPos[1], hidingPos[2]);
@@ -727,9 +758,7 @@ function glowIfNPC(state, entity) {
         )
     ) {
         entity.setGlowing(state);
-        if (state) {
-            entity.setGlowingColor(COLOUR_SCHEME.NPC);
-        }
+        if (state) entity.setGlowingColor(COLOUR_SCHEME.NPC);
         return true;
     }
 }
@@ -745,14 +774,14 @@ function isEntityAThrownSword(e) {
 }
 
 function isEntityADroppedBow(e) {
-    let yawPitchRoll = e.getRightArmRotation();
+    const yawPitchRoll = e.getRightArmRotation();
     return !(yawPitchRoll[0] < 0 || yawPitchRoll[1] !== 50 || yawPitchRoll[2] !== 0 || e.isSmall() || e.invisible);
 }
 
 function glowEntities(goldState, bowState, snowGolemState) {
     let foundSword = false;
     World.getEntities().forEach((e) => {
-        let name = e.getName().getString();
+        const name = e.getName().getString();
         if (name === "Gold Ingot") {
             e.setGlowing(goldState);
             if (goldState) {
@@ -778,24 +807,18 @@ function glowEntities(goldState, bowState, snowGolemState) {
                     !thrownSwordAlertOnCooldown &&
                     !GlobalVars.getBoolean("mm.youAreMurderer")
                 ) {
-                    titleAlert("SWORD THROWN", COLOUR_SCHEME.LOG_RED, 0.3);
+                    titleAlert(" 🗡 SWORD THROWN 🗡 ", COLOUR_SCHEME.LOG_RED, 0.3);
                     cooldownVariable("thrownSwordAlertOnCooldown", 5000);
                 }
             } else if (isEntityADroppedBow(e)) {
                 e.setGlowing(bowState);
-                if (bowState) {
-                    e.setGlowingColor(COLOUR_SCHEME.BOWER_PRIMARY);
-                }
+                if (bowState) e.setGlowingColor(COLOUR_SCHEME.BOWER_PRIMARY);
             }
         } else if (name === "Snow Golem" && murderMysteryMap === "Mountain") {
             e.setGlowing(snowGolemState);
-            if (snowGolemState) {
-                e.setGlowingColor(COLOUR_SCHEME.NPC);
-            }
+            if (snowGolemState) e.setGlowingColor(COLOUR_SCHEME.NPC);
         }
-        if (!foundSword) {
-            currentThrownSword = null;
-        }
+        if (!foundSword) currentThrownSword = null;
     });
 }
 
@@ -810,13 +833,13 @@ function autoPlay() {
 function getTablistPlayerNames(withoutYourName) {
     let players = [...World.getPlayers()].map((player) => player.getName());
     if (withoutYourName) {
-        players = players.filter((name) => name !== yourName)
+        players = players.filter((name) => name !== yourName);
     }
-    return players
+    return players;
 }
 
 function getPlayerObjectFromName(name) {
-    let players = [...World.getLoadedPlayers()].filter((player) => player.getName().getString() === name);
+    const players = [...World.getLoadedPlayers()].filter((player) => player.getName().getString() === name);
     if (players.length > 0) {
         return players[0];
     }
@@ -824,8 +847,8 @@ function getPlayerObjectFromName(name) {
 }
 
 function detectPrayedMessage(txt) {
-    let detective = txt.match(prayedDetective)?.[1] ?? null;
-    let murderer = txt.match(prayedMurderer)?.[1] ?? null;
+    const detective = txt.match(prayedDetective)?.[1] ?? null;
+    const murderer = txt.match(prayedMurderer)?.[1] ?? null;
     if (detective && !bowers.has(detective)) {
         return logPlayer(detective, getPlayerObjectFromName(detective), null, "bower");
     } else if (murderer && !murderers.has(murderer)) {
@@ -836,24 +859,18 @@ function detectPrayedMessage(txt) {
 }
 
 function interpretMessage(txt) {
-    if (HYPIXEL_RANKS.some((rank) => txt.includes(`[${rank}]`))) {
-        return null;
-    }
-    if (txt.includes("Teaming with the Murderer")) {
-        return "notMurderer";
-    }
-    if (txt.includes("Teaming with the Detective") || txt.includes("The previous Murderer left, you are now")) {
+    if (HYPIXEL_RANKS.some((rank) => txt.includes(`[${rank}]`))) return null;
+    if (txt.includes("Teaming with the Murderer")) return "notMurderer";
+    if (txt.includes("Teaming with the Detective") || txt.includes("The previous Murderer left, you are now"))
         return "murderer";
-    }
-    if (txt.endsWith("Winner: PLAYERS") || txt.endsWith("Winner: MURDERER") || txt.startsWith("YOU DIED!")) {
+    if (txt.endsWith("Winner: PLAYERS") || txt.endsWith("Winner: MURDERER") || txt.startsWith("YOU DIED!"))
         return "gameEnd";
-    }
     return detectPrayedMessage(txt);
 }
 
 function shouldProceedWithTickLoop() {
     if (isOnHypixel) {
-        let scoreboard = World.getScoreboards()?.getCurrentScoreboard()?.getName().toLowerCase();
+        const scoreboard = World.getScoreboards()?.getCurrentScoreboard()?.getName().toLowerCase();
         if (scoreboard !== "murdermystery" && !GlobalVars.getBoolean("mm.debug")) {
             return false;
         }
@@ -894,7 +911,7 @@ function tryGlowAll() {
 
 function logPlayer(name, player, held = null, bypass = null) {
     held = !held ? player?.getMainHand().getItemId() : held;
-    let dist = !player ? "NaN" : distanceFrom(player);
+    const dist = !player ? "NaN" : distanceFrom(player);
     let tryUpdateHud = false;
 
     // New murderer found
@@ -902,7 +919,7 @@ function logPlayer(name, player, held = null, bypass = null) {
         murderers.add(name);
         if (name !== yourName) {
             // The murderer isn't you, so log it and play a sound.
-            log(`Murderer logged (${name}) - ${dist} blocks away`, "red");
+            log(`Murderer logged - ${name} (${dist} blocks away)`, "red");
             notification(0.3);
         }
         tryUpdateHud = true;
@@ -916,7 +933,7 @@ function logPlayer(name, player, held = null, bypass = null) {
                 log(`A murderer (${name}) has a bow!`);
                 notification(0.3);
             } else {
-                log(`Bow player logged (${name}) - ${dist} blocks away`, "aqua");
+                log(`Bow player logged - ${name} (${dist} blocks away)`, "aqua");
                 notification(1.1);
             }
         }
@@ -925,18 +942,16 @@ function logPlayer(name, player, held = null, bypass = null) {
     // New target found
     else if (Object.values(cachedUUIDToTargetMap).includes(name) && !targets.has(name)) {
         targets.add(name);
-        log(`Target logged (${name}) - ${dist} blocks away`, "gold");
+        log(`Target logged - ${name} (${dist} blocks away)`, "gold");
         notification(1.0);
         tryUpdateHud = true;
     }
 
-    if (tryUpdateHud) {
-        updateHud();
-    }
+    tryUpdateHud && updateHud();
 }
 
 function updateLogs() {
-    let tablistPlayers = getTablistPlayerNames();
+    const tablistPlayers = getTablistPlayerNames();
     let modified = false;
     [...murderers, ...bowers].forEach((player) => {
         if (!tablistPlayers.includes(player)) {
@@ -951,17 +966,15 @@ function updateLogs() {
             modified = true;
         }
     });
-    if (modified) {
-        updateHud();
-    }
+    modified && updateHud();
 }
 
 function logViaCommand(role = null, rawName, removing = false) {
-    let name = findCaseInsensitiveMatch(getTablistPlayerNames(), rawName);
+    const name = findCaseInsensitiveMatch(getTablistPlayerNames(), rawName);
     let tryUpdateHud = false;
     if (!isInMurderMysteryGame || !name) {
         return log(
-            "You are either not in a game of murder mystery (or /mm tick is not on), or the player you tried to log (or remove from a log) is not in your game.",
+            "You are either not in a game of Murder Mystery (or /mm tick is not on), or the player you tried to log (or remove from a log) is not in your game.",
             "red"
         );
     } else if (!removing && ((role === "bower" && bowers.has(name)) || (role === "murderer" && murderers.has(name)))) {
@@ -976,9 +989,7 @@ function logViaCommand(role = null, rawName, removing = false) {
         log(`Removed ${name} from all logs.`, "green");
         tryUpdateHud = true;
     }
-    if (tryUpdateHud) {
-        updateHud();
-    }
+    tryUpdateHud && updateHud();
 }
 
 function updatePlayerGlow(name, player, held, colour = COLOUR_SCHEME.INNOCENT) {
@@ -1014,9 +1025,9 @@ function titleAlert(msg, col, pitch) {
 }
 
 function proximityCheck(name, player) {
-    let [playerList, msg, col, pitch] = GlobalVars.getBoolean("mm.youAreMurderer")
-        ? [bowers, "BOWER CLOSE", COLOUR_SCHEME.LOG_AQUA, 1.1]
-        : [murderers, "MURDERER CLOSE", COLOUR_SCHEME.LOG_RED, 0.3];
+    const [playerList, msg, col, pitch] = GlobalVars.getBoolean("mm.youAreMurderer")
+        ? [bowers, "‼ BOWER CLOSE ‼", COLOUR_SCHEME.LOG_AQUA, 1.1]
+        : [murderers, "‼ MURDERER CLOSE ‼", COLOUR_SCHEME.LOG_RED, 0.3];
     if (
         name !== yourName &&
         playerList.has(name) &&
@@ -1044,11 +1055,9 @@ function iterGamePlayers() {
 
         // Not in the tablist, therefore they are likely a dead body
         if (!getTablistPlayerNames().includes(name)) {
-            let glowBodies = GlobalVars.getBoolean("mm.glowBodies") ?? false;
+            const glowBodies = GlobalVars.getBoolean("mm.glowBodies") ?? false;
             player.setGlowing(glowBodies);
-            if (glowBodies) {
-                player.setGlowingColor(COLOUR_SCHEME.BODY);
-            }
+            if (glowBodies) player.setGlowingColor(COLOUR_SCHEME.BODY);
             return;
         }
 
@@ -1072,9 +1081,7 @@ function iterGamePlayers() {
 }
 
 function registerSwordD3DIfThrownSwordExists() {
-    if (currentThrownSword) {
-        swordPathD3D?.register();
-    }
+    currentThrownSword && swordPathD3D?.register();
 }
 
 function wipeHud() {
@@ -1084,9 +1091,7 @@ function wipeHud() {
 }
 
 function updateHud() {
-    if (!GlobalVars.getBoolean("mm.hud")) {
-        return false;
-    }
+    if (!GlobalVars.getBoolean("mm.hud")) return false;
     wipeHud();
     hudD2D = Hud.createDraw2D();
     hudD2D.register();
@@ -1116,21 +1121,31 @@ function updateHud() {
     return true;
 }
 
-function setGhostBlocks() {
-    let ghostBlockData = MAP_DATA[murderMysteryMap].ghostBlockData;
-    if (ghostBlockData !== undefined) {
-        let coords = ghostBlockData.map((dataPair) => dataPair[0]);
-        coords.forEach((coordSet, i) => {
-            Chat.say(`/cghostblock set ${coordSet[0]} ${coordSet[1]} ${coordSet[2]} ${ghostBlockData[i][1]}`);
-        });
+function setGhostBlocks(errLog = false) {
+    const ghostBlockData = MAP_DATA?.[murderMysteryMap]?.ghostBlockData ?? null;
+    if (!ghostBlockData || ghostBlockData.length === 0) {
+        if (errLog) {
+            log(
+                "You are either not in a game of Murder Mystery, /mm tick is not on, or this map has no ghost block data, so this action cannot be performed.",
+                "red"
+            );
+        }
+        return;
     }
+    const coords = ghostBlockData.map((dataPair) => dataPair[0]);
+    coords.forEach((coordSet, i) => {
+        setGhost(World.getBlock(coordSet[0], coordSet[1], coordSet[2]).getBlockPos(), ghostBlockData[i][1]);
+    });
+    log("Ghost blocks for this map have been set.", "green");
 }
 
-const mainCommand = Chat.createCommandBuilder("mm").executes(
-    JavaWrapper.methodToJavaAsync((ctx) => {
-        JavaWrapper.methodToJavaAsync(() => Chat.say("/mm tick")).run();
-    })
-);
+const mainCommand = Chat.getCommandManager()
+    .createCommandBuilder("mm")
+    .executes(
+        JavaWrapper.methodToJavaAsync((ctx) => {
+            JavaWrapper.methodToJavaAsync(() => Chat.say("/mm tick")).run();
+        })
+    );
 
 const tickCommand = mainCommand.literalArg("tick").executes(
     JavaWrapper.methodToJavaAsync((ctx) => {
@@ -1146,7 +1161,7 @@ const tickCommand = mainCommand.literalArg("tick").executes(
                 startListener = JsMacros.on(
                     "RecvMessage",
                     JavaWrapper.methodToJavaAsync((evt) => {
-                        let result = interpretMessage(evt.text.getString());
+                        const result = interpretMessage(evt.text.getString());
 
                         if (result) {
                             if (result === "gameEnd") {
@@ -1257,7 +1272,7 @@ tickCommand
     .executes(
         JavaWrapper.methodToJavaAsync((ctx) => {
             JavaWrapper.methodToJavaAsync(() => {
-                let rate = Number(ctx.getArg("rate"));
+                const rate = Number(ctx.getArg("rate"));
                 GlobalVars.putInt("mm.tickRate", rate);
                 UPDATE_DELAY = rate;
                 log(`Set update delay to ${rate}`);
@@ -1267,7 +1282,7 @@ tickCommand
 
 mainCommand
     .or(1)
-    .literalArg("logmurderer")
+    .literalArg("logMurderer")
     .wordArg("name")
     .suggest(JavaWrapper.methodToJava((ctx, s) => s.suggestMatching(getTablistPlayerNames(true))))
     .executes(
@@ -1278,7 +1293,7 @@ mainCommand
         })
     )
     .or(1)
-    .literalArg("logbower")
+    .literalArg("logBower")
     .wordArg("name")
     .suggest(JavaWrapper.methodToJava((ctx, s) => s.suggestMatching(getTablistPlayerNames(true))))
     .executes(
@@ -1289,7 +1304,7 @@ mainCommand
         })
     )
     .or(1)
-    .literalArg("logremove")
+    .literalArg("logRemove")
     .wordArg("name")
     .suggest(JavaWrapper.methodToJava((ctx, s) => s.suggestMatching([...bowers, ...murderers])))
     .executes(
@@ -1310,12 +1325,10 @@ mainCommand
         JavaWrapper.methodToJavaAsync((ctx) => {
             JavaWrapper.methodToJavaAsync(() => {
                 if (ctx.getArg("name").toLowerCase() === yourName.toLowerCase()) {
-                    return log("You cannot target yourself.", "red")
+                    return log("You cannot target yourself.", "red");
                 }
                 const uuid = getUUIDFromName(ctx.getArg("name"));
-                if (!uuid) {
-                    return;
-                }
+                if (!uuid) return;
                 if (GlobalVars.getObject("mm.targets").includes(uuid)) {
                     return log("This player has already been targeted.", "red");
                 }
@@ -1333,7 +1346,7 @@ mainCommand
         JavaWrapper.methodToJavaAsync((ctx) => {
             JavaWrapper.methodToJavaAsync(() => {
                 const uuid = getUUIDFromName(ctx.getArg("name"));
-                let targets = GlobalVars.getObject("mm.targets");
+                const targets = GlobalVars.getObject("mm.targets");
                 if (!GlobalVars.getObject("mm.targets").includes(uuid)) {
                     return log("This player is not in your targeted players list.", "red");
                 }
@@ -1372,7 +1385,7 @@ mainCommand
         })
     )
     .or(2)
-    .literalArg("listingame")
+    .literalArg("listInGame")
     .executes(
         JavaWrapper.methodToJavaAsync((ctx) => {
             JavaWrapper.methodToJavaAsync(() => {
@@ -1404,6 +1417,304 @@ mainCommand
         })
     );
 
+function arraysEqual(arr1, arr2) {
+    return arr1.every((val, index) => val === arr2[index]);
+}
+
+function getMapForDataSuggestion(ctx) {
+    let map = ctx.getArg("mapName");
+    if (map === PLACEHOLDERS.CURRENT) {
+        if (!murderMysteryMap) return null;
+        map = murderMysteryMap;
+    }
+    return map;
+}
+
+function manipulateDataObject(path, obj, value, operation) {
+    const stack = path.split(".");
+    while (stack.length > 1) {
+        const key = stack.shift();
+        obj = obj[key];
+        if (!obj) return false;
+    }
+
+    const lastKey = stack.shift(); // assumed to be an array in the context of this script's MAP_DATA
+
+    if (operation === DATA_MOD_MODES.ADD) {
+        obj[lastKey].push(value);
+    } else if (operation === DATA_MOD_MODES.REMOVE) {
+        const index = obj[lastKey].findIndex((arr) => {
+            let compArr = path.endsWith("ghostBlockData") ? arr[0] : arr;
+            let compValue = path.endsWith("ghostBlockData") ? value[0] : value;
+            return arraysEqual(compArr, compValue);
+        });
+        if (index === -1) return false;
+        obj[lastKey].splice(index, 1);
+    } else if (operation === DATA_MOD_MODES.SET) {
+        obj[lastKey] = value;
+    } else if (operation === DATA_MOD_MODES.CLEAR) {
+        obj[lastKey] = [];
+    }
+
+    return obj;
+}
+
+function updateMapData(ctx, coordArg, operation, keySequence, blockArg = null) {
+    // the messiest function i have ever written.
+    const map = ctx.getArg("mapName");
+    if (!murderMysteryMap && map === PLACEHOLDERS.CURRENT) {
+        log(`You cannot use ${PLACEHOLDERS.CURRENT} if you are not in a game of Murder Mystery.`, "red");
+        return false;
+    }
+    keySequence.unshift(map === PLACEHOLDERS.CURRENT ? murderMysteryMap : map);
+    const keyToModify = keySequence[keySequence.length - 1];
+    let pos;
+    if (operation !== DATA_MOD_MODES.CLEAR) {
+        let rawPos;
+        if (keyToModify !== "npcs") {
+            rawPos = ctx.getArg(coordArg);
+        } else {
+            rawPos = Player.getPlayer()?.rayTraceEntity(Math.round(Player.getReach()));
+            if (!rawPos) {
+                log("An entity must be within your reach to perform this action.", "red");
+                return false;
+            }
+        }
+        pos = [rawPos.getX(), rawPos.getY(), rawPos.getZ()];
+    } else {
+        pos = [];
+    }
+    const res = manipulateDataObject(
+        keySequence.join("."),
+        MAP_DATA,
+        keyToModify === "uniqueBlock"
+            ? [World.getBlock(...pos).getId(), pos]
+            : keyToModify === "ghostBlockData"
+            ? [pos, blockArg?.startsWith("minecraft:") ? blockArg : "minecraft:".concat(blockArg)]
+            : pos,
+        operation
+    );
+    if (!res) {
+        log(
+            "Failed to modify data. This may be due to invalid parameters or the modification of non-existent data.",
+            "red"
+        );
+        return false;
+    }
+    if (keySequence.length === 2) {
+        JSON_DATA.MAP_DATA[keySequence[0]] = res;
+    } else {
+        JSON_DATA.MAP_DATA[keySequence[0]][keySequence[1]] = res;
+    }
+    write("data.json", JSON_DATA);
+    log(
+        `Applied action \"${operation.toUpperCase()}\" to path ${keySequence.join("->")}${
+            operation !== DATA_MOD_MODES.CLEAR ? ` using parameter ${pos.join(", ")}.` : "."
+        }`,
+        "green"
+    );
+    initData(true);
+    return true;
+}
+
+mainCommand
+    .or(1)
+    .literalArg("map")
+    .quotedStringArg("mapName")
+    .suggest(
+        JavaWrapper.methodToJava((ctx, s) => {
+            let maps = Object.keys(MAP_DATA);
+            maps = maps.map((m) => `\"${m}\"`);
+            maps.unshift(`"${PLACEHOLDERS.CURRENT}"`);
+            s.suggestMatching(maps);
+        })
+    )
+    /* HIDING POSITIONS */
+    .literalArg("hidingPositions")
+    .literalArg("add")
+    .blockPosArg("footBlockCoords")
+    .executes(
+        JavaWrapper.methodToJavaAsync((ctx) => {
+            JavaWrapper.methodToJavaAsync(() =>
+                updateMapData(ctx, "footBlockCoords", DATA_MOD_MODES.ADD, ["hidingPositions"])
+            ).run();
+        })
+    )
+    .or(4)
+    .literalArg("remove")
+    .blockPosArg("footBlockCoords")
+    .suggest(
+        JavaWrapper.methodToJava((ctx, s) => {
+            const map = getMapForDataSuggestion(ctx);
+            if (!map) return s.suggestMatching([]);
+            s.suggestMatching(MAP_DATA[map].hidingPositions.map((positions) => positions.join(" ")));
+        })
+    )
+    .executes(
+        JavaWrapper.methodToJavaAsync((ctx) => {
+            JavaWrapper.methodToJavaAsync(() =>
+                updateMapData(ctx, "footBlockCoords", DATA_MOD_MODES.REMOVE, ["hidingPositions"])
+            ).run();
+        })
+    )
+    .or(4)
+    .literalArg("clear")
+    .executes(
+        JavaWrapper.methodToJavaAsync((ctx) => {
+            JavaWrapper.methodToJavaAsync(() => {
+                updateMapData(ctx, "", DATA_MOD_MODES.CLEAR, ["hidingPositions"]);
+            }).run();
+        })
+    )
+    /* TRAP BLOCKS */
+    .or(3)
+    .literalArg("traps")
+    .literalArg("add")
+    .blockPosArg("coords")
+    .executes(
+        JavaWrapper.methodToJavaAsync((ctx) => {
+            JavaWrapper.methodToJavaAsync(() => updateMapData(ctx, "coords", DATA_MOD_MODES.ADD, ["traps"])).run();
+        })
+    )
+    .or(4)
+    .literalArg("remove")
+    .blockPosArg("coords")
+    .suggest(
+        JavaWrapper.methodToJava((ctx, s) => {
+            const map = getMapForDataSuggestion(ctx);
+            if (!map) return s.suggestMatching([]);
+            s.suggestMatching(MAP_DATA[map].traps.map((positions) => positions.join(" ")));
+        })
+    )
+    .executes(
+        JavaWrapper.methodToJavaAsync((ctx) => {
+            JavaWrapper.methodToJavaAsync(() => updateMapData(ctx, "coords", DATA_MOD_MODES.REMOVE, ["traps"])).run();
+        })
+    )
+    .or(4)
+    .literalArg("clear")
+    .executes(
+        JavaWrapper.methodToJavaAsync((ctx) => {
+            JavaWrapper.methodToJavaAsync(() => {
+                updateMapData(ctx, "", DATA_MOD_MODES.CLEAR, ["traps"]);
+            }).run();
+        })
+    )
+    /* GHOST BLOCKS */
+    .or(3)
+    .literalArg("ghostBlockData")
+    .literalArg("add")
+    .blockPosArg("coords")
+    .blockArg("block")
+    .executes(
+        JavaWrapper.methodToJavaAsync((ctx) => {
+            JavaWrapper.methodToJavaAsync(() => {
+                updateMapData(ctx, "coords", DATA_MOD_MODES.ADD, ["ghostBlockData"], ctx.getArg("block").getId());
+            }).run();
+        })
+    )
+    .or(4)
+    .literalArg("remove")
+    .blockPosArg("coords")
+    .suggest(
+        JavaWrapper.methodToJava((ctx, s) => {
+            const map = getMapForDataSuggestion(ctx);
+            if (!map) return s.suggestMatching([]);
+            s.suggestMatching(MAP_DATA[map].ghostBlockData.map((data) => data[0].join(" ")));
+        })
+    )
+    .executes(
+        JavaWrapper.methodToJavaAsync((ctx) => {
+            JavaWrapper.methodToJavaAsync(() =>
+                updateMapData(ctx, "coords", DATA_MOD_MODES.REMOVE, ["ghostBlockData"])
+            ).run();
+        })
+    )
+    .or(4)
+    .literalArg("clear")
+    .executes(
+        JavaWrapper.methodToJavaAsync((ctx) => {
+            JavaWrapper.methodToJavaAsync(() => {
+                updateMapData(ctx, "", DATA_MOD_MODES.CLEAR, ["ghostBlockData"]);
+            }).run();
+        })
+    )
+    /* BLOCKS OF INTEREST */
+    .or(3)
+    .literalArg("bois")
+    .literalArg("add")
+    .blockPosArg("coords")
+    .executes(
+        JavaWrapper.methodToJavaAsync((ctx) => {
+            JavaWrapper.methodToJavaAsync(() =>
+                updateMapData(ctx, "coords", DATA_MOD_MODES.ADD, ["pois", "bois"])
+            ).run();
+        })
+    )
+    .or(4)
+    .literalArg("remove")
+    .blockPosArg("coords")
+    .suggest(
+        JavaWrapper.methodToJava((ctx, s) => {
+            const map = getMapForDataSuggestion(ctx);
+            if (!map) return s.suggestMatching([]);
+            s.suggestMatching(MAP_DATA[map].pois.bois.map((positions) => positions.join(" ")));
+        })
+    )
+    .executes(
+        JavaWrapper.methodToJavaAsync((ctx) => {
+            JavaWrapper.methodToJavaAsync(() =>
+                updateMapData(ctx, "coords", DATA_MOD_MODES.REMOVE, ["pois", "bois"])
+            ).run();
+        })
+    )
+    .or(4)
+    .literalArg("clear")
+    .executes(
+        JavaWrapper.methodToJavaAsync((ctx) => {
+            JavaWrapper.methodToJavaAsync(() => {
+                updateMapData(ctx, "", DATA_MOD_MODES.CLEAR, ["pois", "bois"]);
+            }).run();
+        })
+    )
+    /* NPCS */
+    .or(3)
+    .literalArg("npcs")
+    .literalArg("add")
+    .executes(
+        JavaWrapper.methodToJavaAsync((ctx) => {
+            JavaWrapper.methodToJavaAsync(() => updateMapData(ctx, "", DATA_MOD_MODES.ADD, ["pois", "npcs"])).run();
+        })
+    )
+    .or(4)
+    .literalArg("remove")
+    .executes(
+        JavaWrapper.methodToJavaAsync((ctx) => {
+            JavaWrapper.methodToJavaAsync(() => updateMapData(ctx, "", DATA_MOD_MODES.REMOVE, ["pois", "npcs"])).run();
+        })
+    )
+    .or(4)
+    .literalArg("clear")
+    .executes(
+        JavaWrapper.methodToJavaAsync((ctx) => {
+            JavaWrapper.methodToJavaAsync(() => {
+                updateMapData(ctx, "", DATA_MOD_MODES.CLEAR, ["pois", "npcs"]);
+            }).run();
+        })
+    )
+    /* Unique Block */
+    .or(3)
+    .literalArg("uniqueBlock")
+    .literalArg("set")
+    .blockPosArg("coords")
+    .executes(
+        JavaWrapper.methodToJavaAsync((ctx) => {
+            JavaWrapper.methodToJavaAsync(() =>
+                updateMapData(ctx, "coords", DATA_MOD_MODES.SET, ["uniqueBlock"])
+            ).run();
+        })
+    );
+
 autoBuildSimpleCommands(mainCommand);
 mainCommand.register();
 
@@ -1425,7 +1736,7 @@ Chat.say("/mm tick");
 // Baritone
 let baritoneGoalBlock, primaryBaritone, baritoneSettings, baritoneGoalProcess, baritoneCommandMan, isBaritoneAvailable;
 try {
-    let baseAPI = Java.type("baritone.api.BaritoneAPI");
+    const baseAPI = Java.type("baritone.api.BaritoneAPI");
     baritoneGoalBlock = Java.type("baritone.api.pathing.goals.GoalBlock");
     primaryBaritone = baseAPI.getProvider().getPrimaryBaritone();
     baritoneSettings = baseAPI.getSettings();
@@ -1433,7 +1744,7 @@ try {
     baritoneCommandMan = primaryBaritone.getCommandManager();
     isBaritoneAvailable = true;
     log("Successfully loaded the Baritone API.", "green");
-} catch (err) {
+} catch {
     isBaritoneAvailable = false;
     log("Could not load the Baritone API. Baritone-related features will not work.", "red");
 }
