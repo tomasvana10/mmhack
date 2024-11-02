@@ -3,9 +3,7 @@ const path = require("path");
 
 const absPath = path.resolve(__dirname);
 
-let DOC_DATA;
-
-DOC_DATA = JSON.parse(fs.readFileSync(path.join(absPath, "data.json"), "utf-8")).DOC_DATA;
+let DOC_DATA = JSON.parse(fs.readFileSync(path.join(absPath, "data.json"), "utf-8")).DOC_DATA;
 
 const sortDocs = (data) => {
     const formatted = {
